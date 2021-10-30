@@ -5,8 +5,8 @@ import com.boki.realworld.api.user.exception.InvalidUnFollowUserException;
 import com.boki.realworld.api.user.exception.InvalidUserException;
 import com.boki.realworld.common.BaseTimeEntity;
 import com.boki.realworld.common.exception.IllegalParameterException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,12 +29,10 @@ import org.springframework.util.StringUtils;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "users"
-    , indexes = {
-    @Index(name = "i_email", columnList = "email"),
-    @Index(name = "i_username", columnList = "username")
-}
-)
+@Table(name = "users", indexes = {
+    @Index(name = "idx_email", columnList = "email"),
+    @Index(name = "idx_username", columnList = "username")
+})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -64,7 +62,8 @@ public class User extends BaseTimeEntity {
         joinColumns = @JoinColumn(name = "FOLLOWING_ID"),
         inverseJoinColumns = @JoinColumn(name = "FOLLOWER_ID")
     )
-    private final List<User> followList = new ArrayList<>();
+//    private final List<User> followList = new ArrayList<>(); // DELETE->INSERT 2번의 쿼리가 나감
+    private final Set<User> followList = new HashSet<>(); // DELETE 1번만 나감
 
     @Builder
     public User(Long id, String email, String username, String password, String token,

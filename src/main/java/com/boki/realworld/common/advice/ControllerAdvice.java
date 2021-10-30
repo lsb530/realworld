@@ -3,6 +3,9 @@ package com.boki.realworld.common.advice;
 import com.boki.realworld.common.exception.BadRequestException;
 import com.boki.realworld.common.exception.DuplicatedException;
 import com.boki.realworld.common.exception.NotFoundException;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,21 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponse> bindException(BindException e) {
         log.error("BindException : {}", e.getMessage());
         return ResponseEntity.unprocessableEntity().body(ErrorResponse.from(e.getBindingResult()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> constraintException(ConstraintViolationException e) {
+        log.error("ConstraintViolationException : {}", e.getMessage());
+        Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+        String errorMessage;
+        if (!violations.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            violations.forEach(violation -> builder.append(violation.getMessage()).append(" "));
+            errorMessage = builder.toString();
+        } else {
+            errorMessage = "ConstraintViolationException occurred.";
+        }
+        return ResponseEntity.badRequest().body(ErrorResponse.from(errorMessage));
     }
 
     @ExceptionHandler(Exception.class)

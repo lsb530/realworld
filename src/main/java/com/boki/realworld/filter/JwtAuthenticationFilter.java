@@ -5,6 +5,7 @@ import com.boki.realworld.api.user.domain.User;
 import com.boki.realworld.api.user.domain.UserRepository;
 import com.boki.realworld.api.user.exception.UserNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -38,8 +41,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userRepository.findUserByEmail(email)
                     .orElseThrow(UserNotFoundException::new);
                 user.setToken(token);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(email,
-                    user, Collections.emptyList());
+                GrantedAuthority grantedAuthority =
+                    new SimpleGrantedAuthority("admin");
+                ArrayList<GrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(grantedAuthority);
+                Authentication authentication;
+                if(email.startsWith("admin")) {
+                    authentication = new UsernamePasswordAuthenticationToken(email,
+                        user, authorities);
+                } else {
+                    authentication = new UsernamePasswordAuthenticationToken(email,
+                        user, Collections.emptyList());
+                }
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Security Context에 인증 정보를 저장했습니다");
             }, () -> log.info("헤더 없음"));
