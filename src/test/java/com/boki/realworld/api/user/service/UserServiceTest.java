@@ -2,6 +2,7 @@ package com.boki.realworld.api.user.service;
 
 import static com.boki.realworld.fixture.UserFixture.USER1;
 import static com.boki.realworld.fixture.UserFixture.USER2;
+import static com.boki.realworld.fixture.UserFixture.USER_TOKEN;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,18 +10,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.anyString;
 
-import com.boki.realworld.config.TokenProvider;
 import com.boki.realworld.api.user.domain.User;
 import com.boki.realworld.api.user.domain.UserRepository;
 import com.boki.realworld.api.user.dto.request.LoginRequest;
-import com.boki.realworld.api.user.dto.request.LoginRequest.NestedClass;
 import com.boki.realworld.api.user.dto.request.RegistrationRequest;
 import com.boki.realworld.api.user.dto.request.UpdateRequest;
-import com.boki.realworld.api.user.dto.response.UserResponse.UserInfo;
+import com.boki.realworld.api.user.dto.request.UpdateRequest.UserInfo;
+import com.boki.realworld.api.user.dto.response.UserResponse;
 import com.boki.realworld.api.user.exception.DuplicatedEmailException;
 import com.boki.realworld.api.user.exception.DuplicatedUsernameException;
 import com.boki.realworld.api.user.exception.UserNotFoundException;
 import com.boki.realworld.api.user.exception.WrongPasswordException;
+import com.boki.realworld.config.TokenProvider;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,11 +38,11 @@ class UserServiceTest {
 
     private User user;
 
-    private LoginRequest.NestedClass loginUserdata;
+    private LoginRequest.UserInfo loginUserdata;
 
-    private RegistrationRequest.NestedClass registrationUserData;
+    private RegistrationRequest.UserInfo registrationUserData;
 
-    private UpdateRequest.NestedClass updateUserData;
+    private UpdateRequest.UserInfo updateUserData;
 
     @Mock
     private UserRepository userRepository;
@@ -58,16 +59,16 @@ class UserServiceTest {
         user = User.builder()
             .email(USER1.getEmail()).username(USER1.getUsername())
             .password(USER1.getPassword()).build();
-        loginUserdata = NestedClass.builder()
+        loginUserdata = LoginRequest.UserInfo.builder()
             .email(user.getEmail())
             .password(user.getPassword())
             .build();
-        registrationUserData = RegistrationRequest.NestedClass.builder()
+        registrationUserData = RegistrationRequest.UserInfo.builder()
             .username(user.getUsername())
             .email(user.getEmail())
             .password(user.getPassword())
             .build();
-        updateUserData = UpdateRequest.NestedClass.builder()
+        updateUserData = UserInfo.builder()
             .email(USER2.getEmail())
             .username(USER2.getUsername())
             .password(user.getPassword())
@@ -105,9 +106,10 @@ class UserServiceTest {
 
         given(userRepository.findUserByEmail(anyString())).willReturn(Optional.of(user));
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
-        given(tokenProvider.generate(user.getEmail())).willReturn("abc.def.ghi");
+        given(tokenProvider.generateFrom(user)).willReturn("abc.def.ghi");
 
-        UserInfo response = userService.authenticate(loginRequest).getUserResponse();
+        com.boki.realworld.api.user.dto.response.UserResponse.UserInfo response = userService.authenticate(
+            loginRequest).getUser();
 
         assertAll(
             () -> assertEquals(response.getEmail(), user.getEmail()),
@@ -123,7 +125,8 @@ class UserServiceTest {
 
         given(userRepository.existsUserByEmail(anyString())).willReturn(true);
 
-        assertThrows(DuplicatedEmailException.class, () -> userService.registration(registrationRequest));
+        assertThrows(DuplicatedEmailException.class,
+            () -> userService.registration(registrationRequest));
     }
 
     @DisplayName("[회원가입] - 해당 유저명이 중복이라면 예외 발생")
@@ -133,7 +136,8 @@ class UserServiceTest {
 
         given(userRepository.existsUserByUsername(anyString())).willReturn(true);
 
-        assertThrows(DuplicatedUsernameException.class, () -> userService.registration(registrationRequest));
+        assertThrows(DuplicatedUsernameException.class,
+            () -> userService.registration(registrationRequest));
     }
 
     @DisplayName("[회원가입]")
@@ -146,7 +150,8 @@ class UserServiceTest {
         given(userRepository.existsUserByEmail(anyString())).willReturn(false);
         given(userRepository.save(any(User.class))).willReturn(user);
 
-        UserInfo response = userService.registration(registrationRequest).getUserResponse();
+        com.boki.realworld.api.user.dto.response.UserResponse.UserInfo response = userService.registration(
+            registrationRequest).getUser();
         assertAll(
             () -> assertEquals(response.getUsername(), user.getUsername()),
             () -> assertEquals(response.getEmail(), user.getEmail())
@@ -158,10 +163,12 @@ class UserServiceTest {
     void updateWithDuplicatedEmail() {
         UpdateRequest updateRequest = new UpdateRequest(updateUserData);
 
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(userRepository.existsUserByEmail(any())).willReturn(true);
         given(userRepository.existsUserByUsername(any())).willReturn(false);
 
-        assertThrows(DuplicatedEmailException.class, () -> userService.update(updateRequest, user));
+        assertThrows(DuplicatedEmailException.class,
+            () -> userService.update(updateRequest, USER_TOKEN));
     }
 
     @DisplayName("[회원정보 수정] - 해당 유저명이 중복이라면 예외 발생")
@@ -169,9 +176,11 @@ class UserServiceTest {
     void updateWithDuplicatedUsername() {
         UpdateRequest updateRequest = new UpdateRequest(updateUserData);
 
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(userRepository.existsUserByUsername(any())).willReturn(true); // null 처리때문에 any()
 
-        assertThrows(DuplicatedUsernameException.class, () -> userService.update(updateRequest, user));
+        assertThrows(DuplicatedUsernameException.class,
+            () -> userService.update(updateRequest, USER_TOKEN));
     }
 
     @DisplayName("[회원정보 수정]")
@@ -179,19 +188,22 @@ class UserServiceTest {
     void update() {
         UpdateRequest updateRequest = new UpdateRequest(updateUserData);
 
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(userRepository.existsUserByUsername(any())).willReturn(false); // null 처리때문에 any()
         given(userRepository.existsUserByEmail(any())).willReturn(false);
         given(passwordEncoder.encode(any())).willReturn("password");
-        given(tokenProvider.generate(any())).willReturn("abc.def.ghi");
+        given(tokenProvider.generateFrom(user)).willReturn("abc.def.ghi");
+//        given(tokenProvider.generate(any())).willReturn("abc.def.ghi");
 
-        UserInfo response = userService.update(updateRequest, user).getUserResponse();
+        UserResponse.UserInfo response = userService.update(
+            updateRequest, USER_TOKEN).getUser();
 
         assertAll(
             () -> assertEquals(response.getEmail(), USER2.getEmail()),
-            () -> assertEquals(response.getUsername(),USER2.getUsername()),
-            () -> assertEquals(response.getToken(),"abc.def.ghi"),
-            () -> assertEquals(response.getBio(),"I like to skateboard"),
-            () -> assertEquals(response.getImage(),"https://i.stack.imgur.com/xHWG8.jpg")
+            () -> assertEquals(response.getUsername(), USER2.getUsername()),
+            () -> assertEquals(response.getToken(), "abc.def.ghi"),
+            () -> assertEquals(response.getBio(), "I like to skateboard"),
+            () -> assertEquals(response.getImage(), "https://i.stack.imgur.com/xHWG8.jpg")
         );
     }
 

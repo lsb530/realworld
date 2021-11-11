@@ -46,7 +46,7 @@ public class TagController {
     @PostMapping("/tags")
     private ResponseEntity<MultipleTagResponse> saveAllTags(
         @RequestBody MultipleTagRequest request) {
-        return ResponseEntity.ok().body(tagService.saveAllTags(request));
+        return ResponseEntity.ok().body(tagService.saveAllStringTags(request));
     }
 
 }

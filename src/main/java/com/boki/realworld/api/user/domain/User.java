@@ -58,17 +58,17 @@ public class User extends BaseTimeEntity {
     private String image;
 
     @ManyToMany
-    @JoinTable(name = "followList",
-        joinColumns = @JoinColumn(name = "FOLLOWING_ID"),
-        inverseJoinColumns = @JoinColumn(name = "FOLLOWER_ID")
+    @JoinTable(name = "user_follows",
+        joinColumns = @JoinColumn(name = "following_id"),
+        inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
 //    private final List<User> followList = new ArrayList<>(); // DELETE->INSERT 2번의 쿼리가 나감
     private final Set<User> followList = new HashSet<>(); // DELETE 1번만 나감
 
     @Builder
-    public User(Long id, String email, String username, String password, String token,
+    private User(Long id, String email, String username, String password, String token,
         String bio, String image) {
-        validateBuildParams(email, username, password);
+        validateGenerateParams(email, username, password);
         this.id = id;
         this.email = email;
         this.username = username;
@@ -116,7 +116,7 @@ public class User extends BaseTimeEntity {
         return followList.contains(other);
     }
 
-    private void validateBuildParams(String email, String username, String password) {
+    private void validateGenerateParams(String email, String username, String password) {
         if (!StringUtils.hasText(email) || !StringUtils.hasText(username) || !StringUtils.hasText(
             password)) {
             throw new IllegalParameterException();

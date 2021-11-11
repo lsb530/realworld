@@ -1,5 +1,7 @@
 package com.boki.realworld.config;
 
+import com.boki.realworld.api.user.domain.User;
+import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.common.exception.jwt.TokenExpiredException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -44,6 +46,26 @@ public class TokenProvider {
             .compact();
     }
 
+    public String generateFrom(User user) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        Claims claims = Jwts.claims();
+        claims.put("id", user.getId());
+        claims.put("email", user.getEmail());
+        claims.put("username", user.getUsername());
+        claims.put("password", user.getPassword());
+        claims.put("bio", user.getBio());
+        claims.put("image", user.getImage());
+        return Jwts.builder()
+            .setSubject(user.getEmail())
+            .setClaims(claims)
+            .setIssuedAt(Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant()))
+            .setExpiration(
+                Date.from(
+                    currentTime.plusHours(validity).atZone(ZoneId.systemDefault()).toInstant()))
+            .signWith(SignatureAlgorithm.HS512, key)
+            .compact();
+    }
+
     public Optional<String> extract(String header) {
         if (header == null) {
             return Optional.empty();
@@ -56,8 +78,26 @@ public class TokenProvider {
         return Optional.of(header.substring(HEADER_PREFIX.length()));
     }
 
+    public Claims getClaims(String token) {
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+    }
+
+    public UserToken getUserTokenFrom(String token) {
+        Claims claims = getClaims(token);
+        return UserToken.builder()
+            .id(claims.get("id", Long.class))
+            .email(claims.get("email", String.class))
+            .username(claims.get("username", String.class))
+            .token(token)
+            .bio(claims.get("bio", String.class))
+            .image(claims.get("image", String.class))
+            .build();
+    }
+
     public String parseSubject(String token) {
-        return parseClaims(token).getBody().getSubject();
+//        return parseClaims(token).getBody().getSubject(); // setSubject만 하면 가능하지만 setClaims도 한 경우엔 값이 사라진다
+        return Optional.ofNullable(parseClaims(token).getBody().getSubject())
+            .orElseGet(() -> parseClaims(token).getBody().get("email").toString());
     }
 
     private Jws<Claims> parseClaims(String token) {

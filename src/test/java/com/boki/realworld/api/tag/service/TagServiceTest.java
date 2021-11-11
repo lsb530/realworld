@@ -53,7 +53,7 @@ class TagServiceTest {
     @Test
     void findTag() {
         given(tagRepository.findTagByName(any())).willReturn(Optional.of(tag));
-        TagData response = tagService.findSingleTag(TAG1.getName()).getTagResponse();
+        TagData response = tagService.findSingleTag(TAG1.getName()).getTag();
         assertEquals(TAG1.getName(), response.getName());
     }
 
@@ -78,7 +78,7 @@ class TagServiceTest {
     void saveTag() {
         given(tagRepository.existsTagByName(any())).willReturn(false);
         given(tagRepository.save(any(Tag.class))).willReturn(tag);
-        TagData response = tagService.saveTag(tag.getName()).getTagResponse();
+        TagData response = tagService.saveTag(tag.getName()).getTag();
         assertEquals(tag.getName(), response.getName());
     }
 
@@ -87,7 +87,7 @@ class TagServiceTest {
     void saveTags() {
         given(tagRepository.existsTagByName(any())).willReturn(false);
         given(tagRepository.saveAll(any())).willReturn(tagList);
-        List<String> response = tagService.saveAllTags(REQUEST).getTags();
+        List<String> response = tagService.saveAllStringTags(REQUEST).getTags();
         assertEquals(REQUEST.getTagList().size(), response.size());
     }
 }

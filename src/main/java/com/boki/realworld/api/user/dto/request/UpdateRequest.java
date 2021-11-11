@@ -1,6 +1,5 @@
 package com.boki.realworld.api.user.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import lombok.AccessLevel;
@@ -16,13 +15,14 @@ import org.hibernate.validator.constraints.URL;
 @AllArgsConstructor
 public class UpdateRequest {
 
-    @JsonProperty("user")
     @Valid
-    private NestedClass userInfo;
+    private UserInfo user;
 
     @Getter
     @Builder
-    public static class NestedClass {
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class UserInfo {
 
         @Email(message = "email address is not in a valid format.")
         private String email;

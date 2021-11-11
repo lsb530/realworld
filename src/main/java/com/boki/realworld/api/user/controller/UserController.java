@@ -1,16 +1,14 @@
 package com.boki.realworld.api.user.controller;
 
-import com.boki.realworld.api.user.domain.User;
 import com.boki.realworld.api.user.dto.request.LoginRequest;
 import com.boki.realworld.api.user.dto.request.RegistrationRequest;
 import com.boki.realworld.api.user.dto.request.UpdateRequest;
 import com.boki.realworld.api.user.dto.response.UserResponse;
 import com.boki.realworld.api.user.service.UserService;
+import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.resolver.LoginUser;
-import javax.persistence.EntityManager;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,19 +38,18 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    private ResponseEntity<UserResponse> me(@LoginUser User user) {
-        return ResponseEntity.ok().body(UserResponse.of(user));
+    private ResponseEntity<UserResponse> me(@LoginUser UserToken userToken) {
+        return ResponseEntity.ok().body(UserResponse.of(userToken));
     }
 
     @GetMapping("/user/v2")
-    private ResponseEntity<UserResponse> meNonResolver(@RequestAttribute User user) {
+    private ResponseEntity<UserResponse> meNonResolver(@RequestAttribute UserToken user) {
         return ResponseEntity.ok().body(UserResponse.of(user));
     }
 
     @PutMapping("/user")
     private ResponseEntity<UserResponse> update(@Valid @RequestBody UpdateRequest updateRequest,
-        @LoginUser User user) {
-        return ResponseEntity.ok().body(userService.update(updateRequest, user));
+        @LoginUser UserToken userToken) {
+        return ResponseEntity.ok().body(userService.update(updateRequest, userToken));
     }
-
 }

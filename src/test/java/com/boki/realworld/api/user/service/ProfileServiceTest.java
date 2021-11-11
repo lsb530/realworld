@@ -2,6 +2,7 @@ package com.boki.realworld.api.user.service;
 
 import static com.boki.realworld.fixture.UserFixture.USER1;
 import static com.boki.realworld.fixture.UserFixture.USER2;
+import static com.boki.realworld.fixture.UserFixture.USER_TOKEN;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,6 +13,7 @@ import com.boki.realworld.api.user.domain.User;
 import com.boki.realworld.api.user.domain.UserRepository;
 import com.boki.realworld.api.user.dto.response.ProfileResponse.ProfileInfo;
 import com.boki.realworld.api.user.exception.UserNotFoundException;
+import com.boki.realworld.common.dto.UserToken;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,24 +32,22 @@ class ProfileServiceTest {
 
     private User me;
 
+    private UserToken token;
+
     private User other;
 
     @BeforeEach
     void setUp() {
         profileService = new ProfileService(userRepository);
-        me = User.builder()
-            .id(1L)
-            .username(USER1.getUsername())
-            .email(USER1.getEmail())
-            .password(USER1.getPassword())
-            .build();
+        token = USER_TOKEN;
+        me = USER1;
         other = User.builder()
             .id(2L)
             .username(USER2.getUsername())
             .email(USER2.getEmail())
             .password(USER2.getPassword())
             .build();
-        given(userRepository.findById(any())).willReturn(Optional.of(me));
+        given(userRepository.findById(token.getId())).willReturn(Optional.of(me));
     }
 
     @DisplayName("[회원 조회] - 해당 유저명을 갖는 유저가 없으면 예외 발생")
@@ -55,16 +55,15 @@ class ProfileServiceTest {
     void getProfileWithNotFoundUsername() {
         given(userRepository.findUserByUsername(any())).willReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
-            () -> profileService.getProfile(other.getUsername(), me));
+            () -> profileService.getProfile(other.getUsername(), token));
     }
 
     @DisplayName("[회원 조회]")
     @Test
     void getProfile() {
-        given(userRepository.findUserByUsername(other.getUsername())).willReturn(
-            Optional.of(other));
-        ProfileInfo response2 = profileService.getProfile(other.getUsername(), me)
-            .getProfileResponse();
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.of(other));
+        ProfileInfo response2 = profileService.getProfile(other.getUsername(), token)
+            .getProfile();
         assertFalse(response2.isFollowing());
     }
 
@@ -73,8 +72,8 @@ class ProfileServiceTest {
     void follow() {
         given(userRepository.findUserByUsername(other.getUsername())).willReturn(
             Optional.of(other));
-        ProfileInfo response = profileService.follow(other.getUsername(), me)
-            .getProfileResponse();
+        ProfileInfo response = profileService.follow(other.getUsername(), token)
+            .getProfile();
         assertTrue(response.isFollowing());
     }
 
@@ -84,8 +83,8 @@ class ProfileServiceTest {
         given(userRepository.findUserByUsername(other.getUsername())).willReturn(
             Optional.of(other));
         me.follow(other);
-        ProfileInfo response = profileService.unfollow(other.getUsername(), me)
-            .getProfileResponse();
+        ProfileInfo response = profileService.unfollow(other.getUsername(), token)
+            .getProfile();
         assertFalse(response.isFollowing());
     }
 }

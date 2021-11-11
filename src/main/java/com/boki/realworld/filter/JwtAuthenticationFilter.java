@@ -1,9 +1,7 @@
 package com.boki.realworld.filter;
 
+import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.config.TokenProvider;
-import com.boki.realworld.api.user.domain.User;
-import com.boki.realworld.api.user.domain.UserRepository;
-import com.boki.realworld.api.user.exception.UserNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +17,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
@@ -29,33 +26,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     private final TokenProvider tokenProvider;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
-        log.info("CustomServletWrappingFilter 가기 전 JwtAuthenticationFilter 거치는중");
+        log.info("JwtAuthenticationFilter 거치는중");
         tokenProvider.extract(request.getHeader(AUTHORIZATION_HEADER))
-            .ifPresentOrElse(token -> {
+            .ifPresent(token -> {
                 String email = tokenProvider.parseSubject(token);
-                User user = userRepository.findUserByEmail(email)
-                    .orElseThrow(UserNotFoundException::new);
-                user.setToken(token);
-                GrantedAuthority grantedAuthority =
+                UserToken userToken = tokenProvider.getUserTokenFrom(token);
+                GrantedAuthority adminAuthority =
                     new SimpleGrantedAuthority("admin");
                 ArrayList<GrantedAuthority> authorities = new ArrayList<>();
-                authorities.add(grantedAuthority);
+                authorities.add(adminAuthority);
                 Authentication authentication;
-                if(email.startsWith("admin")) {
-                    authentication = new UsernamePasswordAuthenticationToken(email,
-                        user, authorities);
+                if (email.startsWith("admin")) {
+                    authentication = new UsernamePasswordAuthenticationToken(email, userToken,
+                        authorities);
                 } else {
-                    authentication = new UsernamePasswordAuthenticationToken(email,
-                        user, Collections.emptyList());
+                    authentication = new UsernamePasswordAuthenticationToken(email, userToken,
+                        Collections.emptyList());
                 }
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Security Context에 인증 정보를 저장했습니다");
-            }, () -> log.info("헤더 없음"));
+            });
         filterChain.doFilter(request, response);
     }
 }

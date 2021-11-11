@@ -1,17 +1,14 @@
 package com.boki.realworld.config;
 
-import static org.springframework.http.HttpMethod.*;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.POST;
 
 import com.boki.realworld.common.exception.jwt.JwtAuthenticationEntryPoint;
-import com.boki.realworld.filter.CustomServletWrappingFilter;
 import com.boki.realworld.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,9 +23,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired // 서블릿 컨테이너에 있는 빈 주입
     private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Autowired
-    private CustomServletWrappingFilter customServletWrappingFilter;
 
     @Bean
         // 서블릿 컨테이너에 빈 등록
@@ -70,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authenticated()
             .antMatchers(POST, "/api/users/login", "/api/users")
             .permitAll()
-            .antMatchers(POST,"/api/tag/**", "/api/tags").hasAuthority("admin")
+            .antMatchers(POST, "/api/tag/**", "/api/tags").hasAuthority("admin")
             .antMatchers(DELETE, "/api/tag/**").hasAuthority("admin")
             .antMatchers(GET, "/api/tag/**", "/api/tags").permitAll()
             .antMatchers("/api/test*", "/api/test/**")

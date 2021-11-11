@@ -1,6 +1,5 @@
 package com.boki.realworld.api.user.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -16,13 +15,14 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 public class LoginRequest {
 
-    @JsonProperty("user")
     @Valid
-    private NestedClass userInfo;
+    private UserInfo user;
 
     @Getter
     @Builder
-    public static class NestedClass {
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class UserInfo {
 
         @NotBlank(message = "email cannot be empty.")
         @Email(message = "email address is not in a valid format.")

@@ -1,8 +1,8 @@
 package com.boki.realworld.api.user.controller;
 
-import com.boki.realworld.api.user.domain.User;
 import com.boki.realworld.api.user.dto.response.ProfileResponse;
 import com.boki.realworld.api.user.service.ProfileService;
+import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.resolver.LoginUser;
 import com.boki.realworld.resolver.OptionalUser;
 import javax.servlet.http.HttpServletRequest;
@@ -26,16 +26,17 @@ public class ProfileController {
 
     @GetMapping("/{username}")
     private ResponseEntity<ProfileResponse> getProfile(
-        @PathVariable("username") String username, @OptionalUser User user) {
-        return ResponseEntity.ok().body(profileService.getProfile(username, user));
+        @PathVariable("username") String username, @OptionalUser UserToken userToken) {
+        return ResponseEntity.ok().body(profileService.getProfile(username, userToken));
     }
 
     @GetMapping("/{username}/v2")
     private ResponseEntity<ProfileResponse> getProfileNonResolver(
         @PathVariable("username") String username, HttpServletRequest request) {
-        Object user = request.getAttribute("user");
-        if (!ObjectUtils.isEmpty(user)) {
-            return ResponseEntity.ok().body(profileService.getProfile(username, (User) user));
+        Object userToken = request.getAttribute("user");
+        if (!ObjectUtils.isEmpty(userToken)) {
+            return ResponseEntity.ok()
+                .body(profileService.getProfile(username, (UserToken) userToken));
         } else {
             return ResponseEntity.ok().body(profileService.getProfile(username, null));
         }
@@ -43,13 +44,13 @@ public class ProfileController {
 
     @PostMapping("/{username}/follow")
     private ResponseEntity<ProfileResponse> follow(
-        @PathVariable("username") String username, @LoginUser User user) {
-        return ResponseEntity.ok().body(profileService.follow(username, user));
+        @PathVariable("username") String username, @LoginUser UserToken userToken) {
+        return ResponseEntity.ok().body(profileService.follow(username, userToken));
     }
 
     @DeleteMapping("/{username}/follow")
     private ResponseEntity<ProfileResponse> unfollow(
-        @PathVariable("username") String username, @LoginUser User user) {
-        return ResponseEntity.ok().body(profileService.unfollow(username, user));
+        @PathVariable("username") String username, @LoginUser UserToken userToken) {
+        return ResponseEntity.ok().body(profileService.unfollow(username, userToken));
     }
 }

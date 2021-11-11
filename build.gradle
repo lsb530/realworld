@@ -1,9 +1,8 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.4'
+    id 'org.springframework.boot' version '2.5.5'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'org.asciidoctor.convert' version '1.5.8'
     id 'java'
-    id 'org.springframework.experimental.aot' version '0.10.3'
     id 'org.graalvm.buildtools.native' version '0.9.3'
     id 'org.hibernate.orm'
 }
@@ -35,6 +34,9 @@ dependencies {
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.7.1'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'commons-codec:commons-codec:1.15'
+    implementation 'com.querydsl:querydsl-core'
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation 'org.hibernate:hibernate-ehcache:5.4.27.Final'
 //    implementation 'org.springframework.boot:spring-boot-devtools:2.5.5'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.json:json:20210307'
@@ -45,6 +47,11 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'mysql:mysql-connector-java'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor(
+            "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa",
+            'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final',
+            'javax.annotation:javax.annotation-api',
+    )
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.rest-assured:rest-assured:4.4.0'
@@ -53,6 +60,19 @@ dependencies {
 test {
 //    outputs.dir snippetsDir
     useJUnitPlatform()
+}
+
+def generated='src/main/generated'
+sourceSets {
+    main.java.srcDirs += [ generated ]
+}
+
+tasks.withType(JavaCompile) {
+    options.annotationProcessorGeneratedSourcesDirectory = file(generated)
+}
+
+clean.doLast {
+    file(generated).deleteDir()
 }
 
 //asciidoctor {

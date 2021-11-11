@@ -39,14 +39,15 @@ public class Tag extends BaseTimeEntity {
     }
 
     @Builder
-    public Tag(Long id, String name) {
+    private Tag(Long id, String name) {
         validateBuildParam(name);
         this.id = id;
         this.name = name;
     }
 
     private void validateBuildParam(String name) {
-        if(!StringUtils.hasText(name) || (name.length() < 2 || name.length() > 15))
+        if (!StringUtils.hasText(name) || (name.length() < 2 || name.length() > 15)) {
             throw new IllegalParameterException();
+        }
     }
 }

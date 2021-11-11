@@ -1,7 +1,7 @@
 package com.boki.realworld.api.user.dto.response;
 
 import com.boki.realworld.api.user.domain.User;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.boki.realworld.common.dto.UserToken;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,11 +14,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserResponse {
 
-    @JsonProperty("user")
-    private UserInfo userResponse;
+    private UserInfo user;
 
     @Getter
     @Builder
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class UserInfo {
 
         private String email;
@@ -35,6 +36,17 @@ public class UserResponse {
             .username(user.getUsername())
             .bio(user.getBio())
             .image(user.getImage())
+            .build();
+        return new UserResponse(userInfo);
+    }
+
+    public static UserResponse of(UserToken userToken) {
+        UserInfo userInfo = UserInfo.builder()
+            .email(userToken.getEmail())
+            .username(userToken.getUsername())
+            .token(userToken.getToken())
+            .bio(userToken.getBio())
+            .image(userToken.getImage())
             .build();
         return new UserResponse(userInfo);
     }

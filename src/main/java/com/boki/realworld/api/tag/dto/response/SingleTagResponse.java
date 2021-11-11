@@ -1,7 +1,6 @@
 package com.boki.realworld.api.tag.dto.response;
 
 import com.boki.realworld.api.tag.domain.Tag;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SingleTagResponse {
 
-    @JsonProperty("tag")
-    private TagData tagResponse;
+    private TagData tag;
 
     public static SingleTagResponse of(Tag tag) {
         return new SingleTagResponse(TagData.of(tag));
@@ -23,6 +21,8 @@ public class SingleTagResponse {
 
     @Getter
     @Builder
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class TagData {
 
         private String name;

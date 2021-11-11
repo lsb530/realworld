@@ -8,10 +8,13 @@ import com.boki.realworld.api.tag.dto.response.SingleTagResponse;
 import com.boki.realworld.api.tag.exception.DuplicatedTagNameException;
 import com.boki.realworld.api.tag.exception.TagNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -37,10 +40,17 @@ public class TagService {
     }
 
     @Transactional
-    public MultipleTagResponse saveAllTags(MultipleTagRequest tagRequest) {
+    public MultipleTagResponse saveAllStringTags(MultipleTagRequest tagRequest) {
         tagRequest.getTagList().forEach(this::validateTagName);
         List<Tag> tags = tagRequest.toEntities();
         return MultipleTagResponse.of(tagRepository.saveAll(tags));
+    }
+
+    @Transactional
+    public List<Tag> saveAndFindAll(List<String> tags) {
+        return tags.stream().map(tag -> tagRepository.findTagByName(tag)
+                .orElseGet(() -> tagRepository.save(new Tag(tag))))
+            .collect(Collectors.toList());
     }
 
     @Transactional
