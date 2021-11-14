@@ -17,13 +17,7 @@ public class ProfileResponse {
     private ProfileInfo profile;
 
     public static ProfileResponse of(User me, User other) {
-        ProfileInfo profileInfo = ProfileInfo.builder()
-            .username(other.getUsername())
-            .bio(other.getBio())
-            .image(other.getImage())
-            .following(!ObjectUtils.isEmpty(me) && me.isFollow(other))
-            .build();
-        return new ProfileResponse(profileInfo);
+        return new ProfileResponse(ProfileInfo.of(me, other));
     }
 
     @Getter
@@ -36,5 +30,14 @@ public class ProfileResponse {
         private String bio;
         private String image;
         private boolean following;
+
+        public static ProfileInfo of(User me, User other) {
+            return ProfileInfo.builder()
+                .username(other.getUsername())
+                .bio(other.getBio())
+                .image(other.getImage())
+                .following(!ObjectUtils.isEmpty(me) && me.isFollow(other))
+                .build();
+        }
     }
 }

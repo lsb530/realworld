@@ -51,7 +51,8 @@ public class UserService {
 
     @Transactional
     public UserResponse update(UpdateRequest updateRequest, UserToken userToken) {
-        User user = userRepository.findById(userToken.getId()).get();
+        User user = userRepository.findById(userToken.getId())
+            .orElseThrow(UserNotFoundException::new);
         UserInfo userInfo = updateRequest.getUser();
         if (!ObjectUtils.isEmpty(userInfo.getUsername()) && !userInfo.getUsername()
             .equals(user.getUsername())) {
@@ -68,7 +69,7 @@ public class UserService {
         user.update(userInfo.getEmail(), userInfo.getUsername(), encodedPassword,
             userInfo.getImage(), userInfo.getBio());
         user.setToken(tokenProvider.generateFrom(user));
-        userRepository.save(user);
+        userRepository.flush();
         return UserResponse.of(user);
     }
 

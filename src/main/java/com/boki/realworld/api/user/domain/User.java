@@ -106,9 +106,9 @@ public class User extends BaseTimeEntity {
         followList.remove(other);
     }
 
-    public void validateNotMe(User other) {
+    private void validateNotMe(User other) {
         if (this == other) {
-            throw new InvalidUserException();
+            throw new InvalidUserException("Yourself can't be followed or unfollowed");
         }
     }
 
@@ -119,7 +119,7 @@ public class User extends BaseTimeEntity {
     private void validateGenerateParams(String email, String username, String password) {
         if (!StringUtils.hasText(email) || !StringUtils.hasText(username) || !StringUtils.hasText(
             password)) {
-            throw new IllegalParameterException();
+            throw new IllegalParameterException("user");
         }
     }
 

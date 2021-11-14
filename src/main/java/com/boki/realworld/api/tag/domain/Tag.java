@@ -47,7 +47,7 @@ public class Tag extends BaseTimeEntity {
 
     private void validateBuildParam(String name) {
         if (!StringUtils.hasText(name) || (name.length() < 2 || name.length() > 15)) {
-            throw new IllegalParameterException();
+            throw new IllegalParameterException("tag");
         }
     }
 }
