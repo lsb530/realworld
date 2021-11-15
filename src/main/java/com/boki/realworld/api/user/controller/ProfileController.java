@@ -5,15 +5,15 @@ import com.boki.realworld.api.user.service.ProfileService;
 import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.resolver.LoginUser;
 import com.boki.realworld.resolver.OptionalUser;
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,14 +32,9 @@ public class ProfileController {
 
     @GetMapping("/{username}/v2")
     private ResponseEntity<ProfileResponse> getProfileNonResolver(
-        @PathVariable("username") String username, HttpServletRequest request) {
-        Object userToken = request.getAttribute("user");
-        if (!ObjectUtils.isEmpty(userToken)) {
-            return ResponseEntity.ok()
-                .body(profileService.getProfile(username, (UserToken) userToken));
-        } else {
-            return ResponseEntity.ok().body(profileService.getProfile(username, null));
-        }
+        @PathVariable("username") String username,
+        @Nullable @RequestAttribute("OptionalUser") UserToken userToken) {
+        return ResponseEntity.ok().body(profileService.getProfile(username, userToken));
     }
 
     @PostMapping("/{username}/follow")

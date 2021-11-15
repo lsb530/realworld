@@ -28,8 +28,8 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public UserResponse authenticate(LoginRequest loginRequest) {
-        LoginRequest.UserInfo userInfo = loginRequest.getUser();
+    public UserResponse authenticate(LoginRequest request) {
+        LoginRequest.UserInfo userInfo = request.getUser();
         User user = userRepository.findUserByEmail(userInfo.getEmail())
             .orElseThrow(UserNotFoundException::new);
         if (!passwordEncoder.matches(userInfo.getPassword(), user.getPassword())) {
@@ -40,20 +40,19 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse registration(RegistrationRequest registrationRequest) {
-        RegistrationRequest.UserInfo userInfo = registrationRequest.getUser();
+    public UserResponse registration(RegistrationRequest request) {
+        RegistrationRequest.UserInfo userInfo = request.getUser();
         validatedUsername(userInfo.getUsername());
         validateEmail(userInfo.getEmail());
-        User user = registrationRequest.toEntity(passwordEncoder);
+        User user = request.toEntity(passwordEncoder);
         user.setToken(tokenProvider.generateFrom(user));
         return UserResponse.of(userRepository.save(user));
     }
 
     @Transactional
-    public UserResponse update(UpdateRequest updateRequest, UserToken userToken) {
-        User user = userRepository.findById(userToken.getId())
-            .orElseThrow(UserNotFoundException::new);
-        UserInfo userInfo = updateRequest.getUser();
+    public UserResponse update(UpdateRequest request, UserToken userToken) {
+        User user = getUserFrom(userToken);
+        UserInfo userInfo = request.getUser();
         if (!ObjectUtils.isEmpty(userInfo.getUsername()) && !userInfo.getUsername()
             .equals(user.getUsername())) {
             validatedUsername(userInfo.getUsername());
@@ -71,6 +70,19 @@ public class UserService {
         user.setToken(tokenProvider.generateFrom(user));
         userRepository.flush();
         return UserResponse.of(user);
+    }
+
+    public User getUserFrom(UserToken token) {
+        if (ObjectUtils.isEmpty(token)) {
+            return null;
+        } else {
+            return userRepository.findById(token.getId()).orElseThrow(UserNotFoundException::new);
+        }
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findUserByUsername(username)
+            .orElseThrow(UserNotFoundException::new);
     }
 
     private void validatedUsername(String username) {

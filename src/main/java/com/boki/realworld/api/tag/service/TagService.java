@@ -10,11 +10,9 @@ import com.boki.realworld.api.tag.exception.TagNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -40,9 +38,9 @@ public class TagService {
     }
 
     @Transactional
-    public MultipleTagResponse saveAllStringTags(MultipleTagRequest tagRequest) {
-        tagRequest.getTagList().forEach(this::validateTagName);
-        List<Tag> tags = tagRequest.toEntities();
+    public MultipleTagResponse saveAllStringTags(MultipleTagRequest request) {
+        request.getTagList().forEach(this::validateTagName);
+        List<Tag> tags = request.toEntities();
         return MultipleTagResponse.of(tagRepository.saveAll(tags));
     }
 

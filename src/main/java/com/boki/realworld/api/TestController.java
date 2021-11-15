@@ -1,4 +1,4 @@
-package com.boki.realworld.api.user.controller;
+package com.boki.realworld.api;
 
 import com.boki.realworld.resolver.ClientIP;
 import java.net.URI;

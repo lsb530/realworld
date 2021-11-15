@@ -25,7 +25,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        log.info("LoginUserArgumentResolver 내부");
+        log.info("In LoginUserArgumentResolver");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return Objects.requireNonNull(authentication.getCredentials(), "No user");
     }

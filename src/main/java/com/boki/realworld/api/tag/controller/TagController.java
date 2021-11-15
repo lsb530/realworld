@@ -4,6 +4,7 @@ import com.boki.realworld.api.tag.dto.request.MultipleTagRequest;
 import com.boki.realworld.api.tag.dto.response.MultipleTagResponse;
 import com.boki.realworld.api.tag.dto.response.SingleTagResponse;
 import com.boki.realworld.api.tag.service.TagService;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,8 @@ public class TagController {
 
     @PostMapping("/tag/{name}")
     private ResponseEntity<SingleTagResponse> saveTag(@PathVariable("name") String name) {
-        return ResponseEntity.ok().body(tagService.saveTag(name));
+        URI location = URI.create("/api/tag/" + name);
+        return ResponseEntity.created(location).body(tagService.saveTag(name));
     }
 
     @DeleteMapping("/tag/{name}")

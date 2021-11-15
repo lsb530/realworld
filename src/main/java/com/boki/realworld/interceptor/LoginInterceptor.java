@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -23,7 +24,10 @@ public class LoginInterceptor implements HandlerInterceptor {
         Object handler) throws Exception {
         log.info("컨트롤러 가기 전 인터셉터 거치는중");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        request.setAttribute("user", authentication.getCredentials());
+        if (!ObjectUtils.isEmpty(authentication.getCredentials())) {
+            request.setAttribute("LoginUser", authentication.getCredentials());
+            request.setAttribute("OptionalUser", authentication.getCredentials());
+        }
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 

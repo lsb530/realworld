@@ -25,7 +25,7 @@ public class OptionalUserArgumentResolver implements HandlerMethodArgumentResolv
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        log.info("OptionalUser Resolver 안");
+        log.info("In OptionalUserArgumentResolver");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!ObjectUtils.isEmpty(authentication.getCredentials())) {
             return authentication.getCredentials();

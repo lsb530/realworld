@@ -1,5 +1,6 @@
 package com.boki.realworld.api.article.controller;
 
+import com.boki.realworld.api.article.domain.Article;
 import com.boki.realworld.api.article.dto.condition.ArticleSearchCondition;
 import com.boki.realworld.api.article.dto.request.CreateArticleRequest;
 import com.boki.realworld.api.article.dto.request.UpdateArticleRequest;
@@ -9,6 +10,7 @@ import com.boki.realworld.api.article.service.ArticleService;
 import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.resolver.LoginUser;
 import com.boki.realworld.resolver.OptionalUser;
+import java.net.URI;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -31,9 +33,10 @@ public class ArticleController {
 
     @PostMapping
     public ResponseEntity<SingleArticleResponse> create(
-        @Valid @RequestBody CreateArticleRequest request,
-        @LoginUser UserToken userToken) {
-        return ResponseEntity.ok().body(articleService.create(request, userToken));
+        @Valid @RequestBody CreateArticleRequest request, @LoginUser UserToken userToken) {
+        String slug = Article.toSlugFrom(request.getArticle().getTitle());
+        URI location = URI.create("/api/articles/" + slug);
+        return ResponseEntity.created(location).body(articleService.create(request, userToken));
     }
 
     @PutMapping("/{slug}")

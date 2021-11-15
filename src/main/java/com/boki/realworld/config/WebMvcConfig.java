@@ -6,16 +6,22 @@ import com.boki.realworld.resolver.LoginUserArgumentResolver;
 import com.boki.realworld.resolver.OptionalUserArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @RequiredArgsConstructor
 @Configuration
-//public class WebMvcConfig extends WebMvcConfigurationSupport { // Question 1 => 작동 안됨
-public class WebMvcConfig implements WebMvcConfigurer { //Question 2 => 작동 됨
+@EnableWebMvc
+public class WebMvcConfig implements WebMvcConfigurer {
+//public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     private final ClientIpArgumentResolver clientIpArgumentResolver;
     private final LoginUserArgumentResolver userArgumentResolver;

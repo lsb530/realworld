@@ -14,8 +14,7 @@ import com.boki.realworld.api.article.exception.DuplicatedSlugException;
 import com.boki.realworld.api.tag.domain.Tag;
 import com.boki.realworld.api.tag.service.TagService;
 import com.boki.realworld.api.user.domain.User;
-import com.boki.realworld.api.user.domain.UserRepository;
-import com.boki.realworld.api.user.exception.UserNotFoundException;
+import com.boki.realworld.api.user.service.UserService;
 import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.common.exception.BadRequestException;
 import java.util.List;
@@ -23,25 +22,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
-@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class ArticleService {
 
-    private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
     private final ArticleQueryRepository articleQueryRepository;
+    private final UserService userService;
     private final TagService tagService;
 
     @Transactional
     public SingleArticleResponse create(CreateArticleRequest request, UserToken userToken) {
-        User author = getUserFrom(userToken);
+        User author = userService.getUserFrom(userToken);
         Article article = request.toEntity(author);
         validateSlug(article.getSlug());
         if (Optional.ofNullable(request.getArticle().getTagList()).isPresent()) {
@@ -54,7 +50,7 @@ public class ArticleService {
     @Transactional
     public SingleArticleResponse update(UpdateArticleRequest request, String slug,
         UserToken userToken) {
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         Article article = getArticleOf(slug);
         Optional.ofNullable(request.getArticle().getTitle())
             .ifPresent(title -> validateSlug(Article.toSlugFrom(title)));
@@ -67,27 +63,27 @@ public class ArticleService {
 
     @Transactional
     public void delete(String slug, UserToken userToken) {
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         Article article = getArticleOf(slug);
         verifyAuthor(article, user);
         articleRepository.delete(article);
     }
 
     public SingleArticleResponse findArticle(String slug, UserToken userToken) {
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         Article article = getArticleOf(slug);
         return SingleArticleResponse.of(article, user);
     }
 
     public MultipleArticleResponse findAll(UserToken userToken, ArticleSearchCondition condition) {
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         List<Article> articles = articleQueryRepository.findAll(condition);
         return MultipleArticleResponse.of(articles, user);
     }
 
     public MultipleArticleResponse findFeedArticles(UserToken userToken,
         ArticleSearchCondition condition) {
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         Set<User> followList = Objects.requireNonNull(user).getFollowList();
         return MultipleArticleResponse.of(
             articleQueryRepository.findFeedArticles(condition, followList), user);
@@ -96,7 +92,7 @@ public class ArticleService {
     @Transactional
     public SingleArticleResponse favoriteArticle(UserToken userToken, String slug) {
         Article article = getArticleOf(slug);
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         article.favorite(user);
         return SingleArticleResponse.of(article, user);
     }
@@ -104,7 +100,7 @@ public class ArticleService {
     @Transactional
     public SingleArticleResponse unFavoriteArticle(UserToken userToken, String slug) {
         Article article = getArticleOf(slug);
-        User user = getUserFrom(userToken);
+        User user = userService.getUserFrom(userToken);
         article.unFavorite(user);
         return SingleArticleResponse.of(article, user);
     }
@@ -121,16 +117,8 @@ public class ArticleService {
         }
     }
 
-    private Article getArticleOf(String slug) {
+    public Article getArticleOf(String slug) {
         return articleRepository.findArticleBySlug(slug)
             .orElseThrow(ArticleNotFoundException::new);
-    }
-
-    private User getUserFrom(UserToken token) {
-        if (ObjectUtils.isEmpty(token)) {
-            return null;
-        } else {
-            return userRepository.findById(token.getId()).orElseThrow(UserNotFoundException::new);
-        }
     }
 }

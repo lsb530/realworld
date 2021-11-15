@@ -7,6 +7,7 @@ import com.boki.realworld.api.user.dto.response.UserResponse;
 import com.boki.realworld.api.user.service.UserService;
 import com.boki.realworld.common.dto.UserToken;
 import com.boki.realworld.resolver.LoginUser;
+import java.net.URI;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -27,14 +28,15 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(value = "/users/login")
-    private ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok().body(userService.authenticate(loginRequest));
+    private ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok().body(userService.authenticate(request));
     }
 
     @PostMapping(value = "/users")
     private ResponseEntity<UserResponse> register(
-        @Valid @RequestBody RegistrationRequest registrationRequest) {
-        return ResponseEntity.ok().body(userService.registration(registrationRequest));
+        @Valid @RequestBody RegistrationRequest request) {
+        URI location = URI.create("/api/profiles/" + request.getUser().getUsername());
+        return ResponseEntity.created(location).body(userService.registration(request));
     }
 
     @GetMapping("/user")
@@ -43,13 +45,14 @@ public class UserController {
     }
 
     @GetMapping("/user/v2")
-    private ResponseEntity<UserResponse> meNonResolver(@RequestAttribute UserToken user) {
-        return ResponseEntity.ok().body(UserResponse.of(user));
+    private ResponseEntity<UserResponse> meNonResolver(
+        @RequestAttribute("LoginUser") UserToken userToken) {
+        return ResponseEntity.ok().body(UserResponse.of(userToken));
     }
 
     @PutMapping("/user")
-    private ResponseEntity<UserResponse> update(@Valid @RequestBody UpdateRequest updateRequest,
+    private ResponseEntity<UserResponse> update(@Valid @RequestBody UpdateRequest request,
         @LoginUser UserToken userToken) {
-        return ResponseEntity.ok().body(userService.update(updateRequest, userToken));
+        return ResponseEntity.ok().body(userService.update(request, userToken));
     }
 }
