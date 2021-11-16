@@ -1,7 +1,6 @@
 plugins {
     id 'org.springframework.boot' version '2.5.5'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.asciidoctor.convert' version '1.5.8'
     id 'java'
     id 'org.graalvm.buildtools.native' version '0.9.3'
     id 'org.hibernate.orm'
@@ -42,6 +41,7 @@ dependencies {
     implementation 'org.json:json:20210307'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'p6spy:p6spy:3.9.1'
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.springframework.boot:spring-boot-devtools:2.5.5'
     runtimeOnly 'com.h2database:h2'
@@ -74,30 +74,3 @@ tasks.withType(JavaCompile) {
 clean.doLast {
     file(generated).deleteDir()
 }
-
-//asciidoctor {
-//    inputs.dir snippetsDir
-//    dependsOn test
-//}
-//
-//bootBuildImage {
-//    builder = 'paketobuildpacks/builder:tiny'
-//    environment = ['BP_NATIVE_IMAGE': 'true']
-//}
-//
-//nativeBuild {
-//    classpath processAotResources.outputs, compileAotJava.outputs
-//}
-//
-//nativeTest {
-//    classpath processAotTestResources.outputs, compileAotTestJava.outputs
-//}
-//
-//hibernate {
-//    enhance {
-//        enableLazyInitialization = true
-//        enableDirtyTracking = true
-//        enableAssociationManagement = true
-//        enableExtendedEnhancement = false
-//    }
-//}

@@ -1,6 +1,9 @@
 package com.boki.realworld.api;
 
 import com.boki.realworld.resolver.ClientIP;
+import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -13,12 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import springfox.documentation.annotations.ApiIgnore;
 
+@ApiIgnore
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
 
+    @Operation(summary = "test hello", description = "hello api example")
     @GetMapping("/header")
     public ResponseEntity<String> test() {
         HttpHeaders headers = new HttpHeaders();
