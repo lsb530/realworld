@@ -29,8 +29,8 @@ public class CommentService {
     @Transactional
     public SingleCommentResponse create(CreateCommentRequest request, String slug,
         UserToken userToken) {
-        Article article = articleService.getArticleOf(slug);
         User author = userService.getUserFrom(userToken);
+        Article article = articleService.getArticleOf(slug);
         Comment comment = request.toEntity(article, author);
         return SingleCommentResponse.of(commentRepository.save(comment), author);
     }
@@ -43,8 +43,8 @@ public class CommentService {
 
     @Transactional
     public void delete(String slug, Long id, UserToken userToken) {
-        Article article = articleService.getArticleOf(slug);
         User user = userService.getUserFrom(userToken);
+        Article article = articleService.getArticleOf(slug);
         Comment comment = findCommentBy(id);
         verifyArticle(comment, article);
         verifyAuthor(comment, user);

@@ -1,9 +1,7 @@
 package com.boki.realworld.api.user.service;
 
 import com.boki.realworld.api.user.domain.User;
-import com.boki.realworld.api.user.domain.UserRepository;
 import com.boki.realworld.api.user.dto.response.ProfileResponse;
-import com.boki.realworld.api.user.exception.UserNotFoundException;
 import com.boki.realworld.common.dto.UserToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,14 +14,14 @@ public class ProfileService {
 
     private final UserService userService;
 
-    public ProfileResponse getProfile(String username, UserToken userToken) {
+    public ProfileResponse getProfile(UserToken userToken, String username) {
         User me = userService.getUserFrom(userToken);
         User other = userService.getUserByUsername(username);
         return ProfileResponse.of(me, other);
     }
 
     @Transactional
-    public ProfileResponse follow(String username, UserToken userToken) {
+    public ProfileResponse follow(UserToken userToken, String username) {
         User me = userService.getUserFrom(userToken);
         User other = userService.getUserByUsername(username);
         me.follow(other);
@@ -31,7 +29,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileResponse unfollow(String username, UserToken userToken) {
+    public ProfileResponse unfollow(UserToken userToken, String username) {
         User me = userService.getUserFrom(userToken);
         User other = userService.getUserByUsername(username);
         me.unfollow(other);

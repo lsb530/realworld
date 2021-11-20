@@ -31,7 +31,7 @@ public class ProfileController {
     @GetMapping("/{username}")
     private ResponseEntity<ProfileResponse> getProfile(
         @PathVariable("username") String username, @OptionalUser UserToken userToken) {
-        return ResponseEntity.ok().body(profileService.getProfile(username, userToken));
+        return ResponseEntity.ok().body(profileService.getProfile(userToken, username));
     }
 
     @ApiOperation(value = "프로필 조회(인터셉터)", notes = "유저 정보와 follow 상태까지 조회한다")
@@ -39,20 +39,20 @@ public class ProfileController {
     private ResponseEntity<ProfileResponse> getProfileNonResolver(
         @PathVariable("username") String username,
         @Nullable @RequestAttribute("OptionalUser") UserToken userToken) {
-        return ResponseEntity.ok().body(profileService.getProfile(username, userToken));
+        return ResponseEntity.ok().body(profileService.getProfile(userToken, username));
     }
 
     @ApiOperation(value = "팔로우", notes = "유저를 팔로우한다")
     @PostMapping("/{username}/follow")
     private ResponseEntity<ProfileResponse> follow(
         @PathVariable("username") String username, @LoginUser UserToken userToken) {
-        return ResponseEntity.ok().body(profileService.follow(username, userToken));
+        return ResponseEntity.ok().body(profileService.follow(userToken, username));
     }
 
     @ApiOperation(value = "언팔로우", notes = "유저를 언팔로우한다")
     @DeleteMapping("/{username}/follow")
     private ResponseEntity<ProfileResponse> unfollow(
         @PathVariable("username") String username, @LoginUser UserToken userToken) {
-        return ResponseEntity.ok().body(profileService.unfollow(username, userToken));
+        return ResponseEntity.ok().body(profileService.unfollow(userToken, username));
     }
 }

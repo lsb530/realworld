@@ -26,6 +26,16 @@ public class UserFixture {
         .image("https://i.stack.imgur.com/xHWG8.jpg")
         .build();
 
+    public static final User USER3 = User.builder()
+        .id(3L)
+        .email("bike@bike.com")
+        .username("bike")
+        .password("bikebike")
+        .token("abc.def.ghi")
+        .bio("bye")
+        .image(null)
+        .build();
+
     public static final User REGISTER_USER = User.builder()
         .username("jake")
         .email("jake@jake.com")

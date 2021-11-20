@@ -91,16 +91,16 @@ public class ArticleService {
 
     @Transactional
     public SingleArticleResponse favoriteArticle(UserToken userToken, String slug) {
-        Article article = getArticleOf(slug);
         User user = userService.getUserFrom(userToken);
+        Article article = getArticleOf(slug);
         article.favorite(user);
         return SingleArticleResponse.of(article, user);
     }
 
     @Transactional
     public SingleArticleResponse unFavoriteArticle(UserToken userToken, String slug) {
-        Article article = getArticleOf(slug);
         User user = userService.getUserFrom(userToken);
+        Article article = getArticleOf(slug);
         article.unFavorite(user);
         return SingleArticleResponse.of(article, user);
     }

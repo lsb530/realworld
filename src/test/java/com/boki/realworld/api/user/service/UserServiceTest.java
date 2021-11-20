@@ -94,7 +94,6 @@ class UserServiceTest {
         LoginRequest loginRequest = new LoginRequest(loginUserdata);
 
         given(userRepository.findUserByEmail(anyString())).willReturn(Optional.empty());
-//        given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 
         assertThrows(UserNotFoundException.class, () -> userService.authenticate(loginRequest));
     }
